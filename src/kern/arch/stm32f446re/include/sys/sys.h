@@ -2,8 +2,6 @@
 #define __SYS_H__
 #include <stdint.h>
 
-
-
 typedef struct {
 	volatile uint32_t CTRL;  // Enable SysTick
 	volatile uint32_t LOAD;  // 24
@@ -17,10 +15,10 @@ typedef struct {
 #define SYSTICK_CTRL_ENABLE (1 << 0)
 #define SYSTICK_CTRL_DISABLE ~(1 << 0)
 #define PER_TICK_TIME_DELAY_MS 10U
-/* 
+/*
 		SysTick Test Code
 		180*10^6*10^(-2)-1 = 1799999 = Reload value for 10ms, for AHBCLK = 180Mhz
-		SysTick Interrup Time Period = (SysTick_LOAD + 1) * Clock_Period 
+		SysTick Interrup Time Period = (SysTick_LOAD + 1) * Clock_Period
 */
 #define SYSTICK_LOAD_VAL_10MS (((180*10*10*10*10*10*10)*(PER_TICK_TIME_DELAY_MS)/1000) - 1)
 
@@ -176,10 +174,14 @@ void __NVIC_SetPriority (IRQn_TypeDef IRQn,uint32_t priority);
 uint32_t __NVIC_GetPriority (IRQn_TypeDef IRQn);
 void __NVIC_EnableIRQn(IRQn_TypeDef IRQn);
 void __NVIC_DisableIRQn(IRQn_TypeDef IRQn);
-
-
-
-
+static __inline void __set_BASEPRI(uint32_t value);
+static __inline void __unset_BASEPRI(void);
+__attribute__((naked)) void __set_PRIMASK(uint32_t priMask);
+static __inline uint32_t __get_PRIMASK(void);
+static __inline void __set_FAULTMASK(uint32_t faultMask);
+static __inline uint32_t __get_FAULTMASK(void);
+void __enable_irq(void);
+void __disable_irq(void);
 
 // NVIC register is 8-bit. The priority puts the preference to the ISR executing before the lower
 // (higher number) priority interrupts.
@@ -236,6 +238,6 @@ use this function to get the execution time required for a code block.
 uint32_t getTime(void);
 void setTime(uint32_t _mscount);
 void SysTick_Delay(uint32_t delay_amount_in_ms);
-void SysTick_Handler(void); 
+void SysTick_Handler(void);
 
 #endif
