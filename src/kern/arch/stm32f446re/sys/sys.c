@@ -67,3 +67,34 @@ void SysTick_Handler(void)
     mscount += PER_TICK_TIME_DELAY_MS;
 }
 
+
+/*
+void NVIC SetPriority (IRQn TypeDef IRQn,uint32 t priority): This function takes two argu-
+ments (i) interrupt number and sets the priority to the interrupt. Note that priority in the above
+NVIC register is 8-bit. The priority puts the preference to the ISR executing before the lower
+(higher number) priority interrupts.
+*/
+void __NVIC_SetPriority (IRQn_TypeDef IRQn,uint32_t priority){
+    NVIC->IP[IRQn] = (uint8_t)(0xFF & priority);
+}
+
+/*
+    uint32 t NVIC GetPriority(IRQn TypeDef IRQn): Return the priority set to the interrupt.
+*/
+uint32_t __NVIC_GetPriority (IRQn_TypeDef IRQn){
+    return (0xFF & NVIC->IP[IRQn]);
+}
+
+/*
+ Enable interrupt given as argument or interrupt number (IRQn typeDef) – data structure (enumerator) defined earlier.
+*/
+void __NVIC_EnableIRQn(IRQn_TypeDef IRQn){
+    int bit_position = (IRQn % 32);
+    NVIC->ISER[IRQn >> 5] |= (1 << bit_position);
+}
+
+// Disable interrupt
+void __NVIC_DisableIRQn(IRQn_TypeDef IRQn){
+    int bit_position = (IRQn % 32);
+    NVIC->ICER[IRQn >> 5] |= (1 << bit_position);
+}
