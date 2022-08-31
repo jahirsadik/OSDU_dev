@@ -13,7 +13,6 @@ void kmain(void)
 	__sys_init();
 	sysTick_init(SYSTICK_LOAD_VAL_10MS); // demonstration of sysTick Init
 
-	__disable_irq();
 	uint32_t num;
 	uint32_t numh;
 	uint32_t total_time = 0;
@@ -21,8 +20,14 @@ void kmain(void)
 	_USART_WRITE(USART2,(uint8_t*)"Version: 1.1\n");
 	_USART_WRITE(USART2,(uint8_t*)"Welcome .... \n");
 
-
+	int i = 0;
 	while(1){
+		i++;
+		if(i > 10){
+			_USART_WRITE(USART2,(uint8_t*)"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+			__disable_irq();
+			_USART_WRITE(USART2,(uint8_t*)"***********************************************************************\n");
+		}
 		sysTick_enable(); // demonstration of sysTick Enable
 		_USART_WRITE(USART2,(uint8_t*)"++++++++++++++++++++++++++++++++++++++++++++++\n");
 		_USART_WRITE(USART2,(uint8_t*)"SysTickCount Before:");
