@@ -5,9 +5,9 @@ TARGET = target
 OBJECT = object
 MAPDIR = mapfiles
 CFLAGS=-c -mcpu=$(MACH) -mthumb $(FPU) -Wall -std=gnu11 -O0
-LDFLAGS= -nostdlib -nostartfiles -nodefaultlibs -fno-exceptions -mcpu=$(MACH) -mthumb  $(FPU) -T stm32_ls.ld -Wl,-Map=$(MAPDIR)/asst01.map -O0
+LDFLAGS= -nostdlib -nostartfiles -nodefaultlibs -fno-exceptions -mcpu=$(MACH) -mthumb  $(FPU) -T stm32_ls.ld -Wl,-Map=$(MAPDIR)/osdu_dev.map -O0
 
-all: clock.o usart.o gpio.o timer.o kmain.o kstdio.o sys.o stm32_startup.o sys_init.o asst01
+all: clock.o usart.o gpio.o timer.o kmain.o kstdio.o sys.o stm32_startup.o sys_init.o osdu_dev
 
 kstdio.o: ../kstdio/kstdio.c
 	$(CC) $(CFLAGS) $^ -o $(OBJECT)/$@
@@ -36,7 +36,7 @@ timer.o: ../arch/stm32f446re/dev/timer.c
 stm32_startup.o: ../arch/stm32f446re/sys/stm32_startup.c
 	$(CC) $(CFLAGS) $^ -o $(OBJECT)/$@
 
-asst01: $(OBJECT)/kmain.o $(OBJECT)/stm32_startup.o $(OBJECT)/sys.o $(OBJECT)/clock.o $(OBJECT)/usart.o $(OBJECT)/gpio.o $(OBJECT)/timer.o $(OBJECT)/kstdio.o $(OBJECT)/sys_init.o
+osdu_dev: $(OBJECT)/kmain.o $(OBJECT)/stm32_startup.o $(OBJECT)/sys.o $(OBJECT)/clock.o $(OBJECT)/usart.o $(OBJECT)/gpio.o $(OBJECT)/timer.o $(OBJECT)/kstdio.o $(OBJECT)/sys_init.o
 	$(CC) $(LDFLAGS) $^ -o $(TARGET)/$@
 load:
 	openocd -f board/stm32f429discovery.cfg

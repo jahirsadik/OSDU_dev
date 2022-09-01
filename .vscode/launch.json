@@ -10,7 +10,7 @@
             "name": "Debug",
             "program": "${workspaceFolder}/<executable file>",
             "args": [],
-            "cwd": "${workspaceFolder}/src/kern/asst01"
+            "cwd": "${workspaceFolder}/src/kern/osdu_dev"
         }
     ]
 }
