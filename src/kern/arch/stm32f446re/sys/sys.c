@@ -89,7 +89,7 @@ void __NVIC_SetPriority (IRQn_TypeDef IRQn,uint32_t priority) {
                 SCB->SHPR1 |= (uint8_t)(0xFFU & priority) << 8;
                 break;
             // UsageFault_IRQn
-            case -11:
+            case -10:
                 SCB->SHPR1 |= (uint8_t)(0xFFU & priority) << 16;
                 break;
             // SVCall_IRQn
@@ -126,7 +126,7 @@ uint32_t __NVIC_GetPriority (IRQn_TypeDef IRQn) {
             case -11:
                 return (SCB->SHPR1 & (0xFFU << 8));
             // UsageFault_IRQn
-            case -11:
+            case -10:
                 return (SCB->SHPR1 & (0xFFU << 16));
             // SVCall_IRQn
             case -5:
@@ -140,6 +140,7 @@ uint32_t __NVIC_GetPriority (IRQn_TypeDef IRQn) {
             default:
                 return 0;
         }
+    }
 }
 
 /*
@@ -263,12 +264,12 @@ uint32_t __get_pending_IRQn(IRQn_TypeDef IRQn) {
 }
 
 uint32_t __NVIC_GetActive(IRQn_TypeDef IRQn) {
-    if(IRQn >= 0){
+    if(IRQn >= 0) {
         int bit_position = (IRQn % 32);
         return (NVIC->IABR[IRQn >> 5] & (1 << bit_position));
     }
     else {
-        switch(IRQn){
+        switch(IRQn) {
              // SYSTICK ACT
             case -1:
                 return (SCB->SHCSR & (1 << 11));
