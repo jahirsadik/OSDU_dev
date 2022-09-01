@@ -187,38 +187,6 @@ __attribute__((naked)) uint32_t __get_FAULTMASK(void);
 void __clear_pending_IRQn(IRQn_TypeDef IRQn);
 uint32_t __get_pending_IRQn(IRQn_TypeDef IRQn);
 uint32_t __NVIC_GetActive(IRQn_TypeDef IRQn);
-
-// NVIC register is 8-bit. The priority puts the preference to the ISR executing before the lower
-// (higher number) priority interrupts.
-// 2. uint32 t NVIC GetPriority(IRQn TypeDef IRQn): Return the priority set to the interrupt.
-// 3. void NVIC EnableIRQn(IRQn TypeDef IRQn): enable interrupt given as argument or interrupt
-// number (IRQn typeDef) – data structure (enumerator) defined earlier.
-// 4. void NVIC DisableIRQn(IRQn TypeDef IRQn): Disable interrupt.
-// 5. void disable irq(): Masking interrupts (‘ disable irq()’) – all interrupts other than HardFault,
-// NMI, and reset.
-// 6. void set BASEPRI(uint32 t value): set BASEPRI(uint32 t value) function mask interrupt
-// number greater and equal to the given interrupt priority as an argument.
-// 7. void enable irq(): Enable (unmask) all interrupts
-
-// 8. void unset BASEPRI(uint32 t value): unset BASEPRI(uint32 t value) function unmask inter-
-// rupts greater or equal to the given argument/priority number.
-
-// 9. void set PRIMASK(uint32 t priMask): Prevent all interrupt without non-maskable interrupt.
-// 10. uint32 t get PRIMASK(void): Return value of the PRIMASK register
-
-// 11. void enable fault irq(void) and void set FAULTMASK(uint32 t faultMask): Enable all inter-
-// rupt including FaultMask.
-
-// 12. void disable fault irq(void): Disable or prevent all interrupt including FaultMask
-// 13. uint32 t get FAULTMASK(void): This function will return the status of the masking value of
-// FaultMask register
-// 14. void clear pending IRQn(IRQn TypeDef IRQn): Clear interrupt pending bit
-// 15. uint32 t get pending IRQn(IRQn TypeDef IRQn): It returns the pending status of an interrupt.
-// 16. uint32 t NVIC GetActive (IRQn TypeDef IRQn): This function return the active status of the
-// interrupt.
-
-
-
 /*
 This function configure the system timer with interrupt. This function must disable the SysTick
 timer, set ‘0’ to VAL register content, and load the reload value so the SysTick timer can interrupt every 10ms. Initialize a global variable ‘mscount’ to ‘0’. The ‘mscount’ variable keeps track of the time in milliseconds from the SysTick timer’s beginning. Then enable the SysTick timer.

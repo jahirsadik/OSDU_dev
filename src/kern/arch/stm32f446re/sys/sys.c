@@ -75,14 +75,71 @@ NVIC register is 8-bit. The priority puts the preference to the ISR executing be
 (higher number) priority interrupts.
 */
 void __NVIC_SetPriority (IRQn_TypeDef IRQn,uint32_t priority) {
-    NVIC->IP[IRQn] = (uint8_t)(0xFFU & priority);
+    if(IRQn >= 0) {
+        NVIC->IP[IRQn] = (uint8_t)(0xFFU & priority);
+    } 
+    else {
+        switch(IRQn){
+            // mem management fault
+            case -12:
+                SCB->SHPR1 |= (uint8_t)(0xFFU & priority) << 0;
+                break;
+            // BusFault_IRQn
+            case -11:
+                SCB->SHPR1 |= (uint8_t)(0xFFU & priority) << 8;
+                break;
+            // UsageFault_IRQn
+            case -11:
+                SCB->SHPR1 |= (uint8_t)(0xFFU & priority) << 16;
+                break;
+            // SVCall_IRQn
+            case -5:
+                SCB->SHPR2 |= (uint8_t)(0xFFU & priority) << 24;
+                break;
+            // PendSV
+            case -2:
+                SCB->SHPR3 |= (uint8_t)(0xFFU & priority) << 16;
+                break;
+            // SysTick exception
+            case -1:
+                SCB->SHPR3 |= (uint8_t)(0xFFU & priority) << 24;
+                break;
+            default:
+                return;
+        }
+    }
 }
 
 /*
     uint32 t NVIC GetPriority(IRQn TypeDef IRQn): Return the priority set to the interrupt.
 */
 uint32_t __NVIC_GetPriority (IRQn_TypeDef IRQn) {
-    return (0xFFU & NVIC->IP[IRQn]);
+    if(IRQn >= 0) {
+        return (0xFFU & NVIC->IP[IRQn]);
+    }    
+    else {
+        switch(IRQn){
+            // mem management fault
+            case -12:
+                return (SCB->SHPR1 & (0xFFU << 0));
+            // BusFault_IRQn
+            case -11:
+                return (SCB->SHPR1 & (0xFFU << 8));
+            // UsageFault_IRQn
+            case -11:
+                return (SCB->SHPR1 & (0xFFU << 16));
+            // SVCall_IRQn
+            case -5:
+                return (SCB->SHPR2 & (0xFFU << 24));
+            // PendSV
+            case -2:
+                return (SCB->SHPR3 & (0xFFU << 16));
+            // SysTick exception
+            case -1:
+                return (SCB->SHPR3 & (0xFFU << 24));
+            default:
+                return 0;
+        }
 }
 
 /*
@@ -90,13 +147,52 @@ uint32_t __NVIC_GetPriority (IRQn_TypeDef IRQn) {
 */
 void __NVIC_EnableIRQn(IRQn_TypeDef IRQn) {
     int bit_position = (IRQn % 32);
-    NVIC->ISER[IRQn >> 5] |= (1 << bit_position);
+    if(IRQn >= 0){
+        NVIC->ISER[IRQn >> 5] |= (1 << bit_position);
+    }
+    else{
+        switch(IRQn){
+            // USGFAULTENA:
+            case -10:
+                SCB->SHCSR |= (1 << 18);
+                break;
+            // BUSFAULTENA
+            case -11:
+                SCB->SHCSR |= (1 << 17);
+                break;
+            // MEMFAULTENA:
+            case -12:
+                SCB->SHCSR |= (1 << 16);
+                break;
+            default:
+                return;
+        }
+    }
 }
 
 // Disable interrupt
 void __NVIC_DisableIRQn(IRQn_TypeDef IRQn) {
     int bit_position = (IRQn % 32);
-    NVIC->ICER[IRQn >> 5] |= (1 << bit_position);
+    if(IRQn >= 0){
+        NVIC->ICER[IRQn >> 5] |= (1 << bit_position);
+    }else{
+        switch(IRQn){
+            // USGFAULTENA:
+            case -10:
+                SCB->SHCSR &= ~(1 << 18);
+                break;
+            // BUSFAULTENA
+            case -11:
+                SCB->SHCSR &= ~(1 << 17);
+                break;
+            // MEMFAULTENA:
+            case -12:
+                SCB->SHCSR &= ~(1 << 16);
+                break;
+            default:
+                return;
+        }
+    }
 }
 
 // Set BASEPRI
@@ -135,16 +231,67 @@ __attribute__((naked)) uint32_t __get_FAULTMASK(void) {
 }
 
 void __clear_pending_IRQn(IRQn_TypeDef IRQn) {
-    int bit_position = (IRQn % 32);
-    NVIC->ICPR[IRQn >> 5] |= (1 << bit_position);
+    if(IRQn >= 0) {
+        int bit_position = (IRQn % 32);
+        NVIC->ICPR[IRQn >> 5] |= (1 << bit_position);
+    }
 }
 
 uint32_t __get_pending_IRQn(IRQn_TypeDef IRQn) {
-    int bit_position = (IRQn % 32);
-    return (NVIC->ISPR[IRQn >> 5] & (1 << bit_position));
+    if(IRQn >= 0) {
+        int bit_position = (IRQn % 32);
+        return (NVIC->ISPR[IRQn >> 5] & (1 << bit_position));
+    }
+    else {
+        switch(IRQn){
+             // SVCALL PEND
+            case -5:
+                return (SCB->SHCSR & (1 << 15));
+            // USGFAULT PEND
+            case -10:
+                return (SCB->SHCSR & (1 << 14));
+            // BUSFAULT PEND
+            case -11:
+                return (SCB->SHCSR & (1 << 13));
+            // MEMFAULT PEND
+            case -12:
+                return (SCB->SHCSR & (1 << 12));
+            default:
+                return 0;
+        }
+    }
 }
 
 uint32_t __NVIC_GetActive(IRQn_TypeDef IRQn) {
-    int bit_position = (IRQn % 32);
-    return (NVIC->IABR[IRQn >> 5] & (1 << bit_position));
+    if(IRQn >= 0){
+        int bit_position = (IRQn % 32);
+        return (NVIC->IABR[IRQn >> 5] & (1 << bit_position));
+    }
+    else {
+        switch(IRQn){
+             // SYSTICK ACT
+            case -1:
+                return (SCB->SHCSR & (1 << 11));
+            // PENDSV ACT
+            case -2:
+                return (SCB->SHCSR & (1 << 10));
+            // Debug monitor ACT
+            case -4:
+                return (SCB->SHCSR & (1 << 8));
+            // SVCALL ACT
+            case -5:
+                return (SCB->SHCSR & (1 << 7));
+            // USGFAULT ACT
+            case -10:
+                return (SCB->SHCSR & (1 << 3));
+            // BUSFAULT ACT
+            case -11:
+                return (SCB->SHCSR & (1 << 1));
+            // MEMFAULT ACT
+            case -12:
+                return (SCB->SHCSR & (1 << 0));
+            default:
+                return 0;
+        }
+    }
 }
