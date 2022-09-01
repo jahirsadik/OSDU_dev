@@ -174,14 +174,19 @@ void __NVIC_SetPriority (IRQn_TypeDef IRQn,uint32_t priority);
 uint32_t __NVIC_GetPriority (IRQn_TypeDef IRQn);
 void __NVIC_EnableIRQn(IRQn_TypeDef IRQn);
 void __NVIC_DisableIRQn(IRQn_TypeDef IRQn);
-static __inline void __set_BASEPRI(uint32_t value);
-static __inline void __unset_BASEPRI(void);
+__attribute__((naked)) void __set_BASEPRI(uint32_t value);
+__attribute__((naked)) void __unset_BASEPRI(void);
 __attribute__((naked)) void __set_PRIMASK(uint32_t priMask);
-static __inline uint32_t __get_PRIMASK(void);
-static __inline void __set_FAULTMASK(uint32_t faultMask);
-static __inline uint32_t __get_FAULTMASK(void);
-void __enable_irq(void);
-void __disable_irq(void);
+__attribute__((naked)) uint32_t __get_PRIMASK(void);
+__attribute__((naked)) void __set_FAULTMASK(uint32_t faultMask);
+__attribute__((naked)) uint32_t __get_FAULTMASK(void);
+#define __enable_irq()  __set_PRIMASK(0x00U)
+#define __disable_irq() __set_PRIMASK(0x01U)
+#define __enable_fault_irq()  __set_FAULTMASK(0x00U)
+#define __disable_fault_irq()  __set_FAULTMASK(0x01U)
+void __clear_pending_IRQn(IRQn_TypeDef IRQn);
+uint32_t __get_pending_IRQn(IRQn_TypeDef IRQn);
+uint32_t __NVIC_GetActive(IRQn_TypeDef IRQn);
 
 // NVIC register is 8-bit. The priority puts the preference to the ISR executing before the lower
 // (higher number) priority interrupts.

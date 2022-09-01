@@ -74,27 +74,27 @@ ments (i) interrupt number and sets the priority to the interrupt. Note that pri
 NVIC register is 8-bit. The priority puts the preference to the ISR executing before the lower
 (higher number) priority interrupts.
 */
-void __NVIC_SetPriority (IRQn_TypeDef IRQn,uint32_t priority){
+void __NVIC_SetPriority (IRQn_TypeDef IRQn,uint32_t priority) {
     NVIC->IP[IRQn] = (uint8_t)(0xFFU & priority);
 }
 
 /*
     uint32 t NVIC GetPriority(IRQn TypeDef IRQn): Return the priority set to the interrupt.
 */
-uint32_t __NVIC_GetPriority (IRQn_TypeDef IRQn){
+uint32_t __NVIC_GetPriority (IRQn_TypeDef IRQn) {
     return (0xFFU & NVIC->IP[IRQn]);
 }
 
 /*
  Enable interrupt given as argument or interrupt number (IRQn typeDef) – data structure (enumerator) defined earlier.
 */
-void __NVIC_EnableIRQn(IRQn_TypeDef IRQn){
+void __NVIC_EnableIRQn(IRQn_TypeDef IRQn) {
     int bit_position = (IRQn % 32);
     NVIC->ISER[IRQn >> 5] |= (1 << bit_position);
 }
 
 // Disable interrupt
-void __NVIC_DisableIRQn(IRQn_TypeDef IRQn){
+void __NVIC_DisableIRQn(IRQn_TypeDef IRQn) {
     int bit_position = (IRQn % 32);
     NVIC->ICER[IRQn >> 5] |= (1 << bit_position);
 }
@@ -102,45 +102,49 @@ void __NVIC_DisableIRQn(IRQn_TypeDef IRQn){
 // Set BASEPRI
 // Note that the value needs to be shifted by 4 when passing the arg
 // This is assuming that only 4 bits are implemented
-static __inline void __set_BASEPRI(uint32_t value) {
-    register uint32_t basepriReg    __asm("basepri");
-    basepriReg = (0xFFU & value);
+__attribute__((naked)) void __set_BASEPRI(uint32_t value) {
+    __asm volatile("MOVS R12, %0": : "r"(value & 0xFFU) : );
+    __asm volatile("MSR BASEPRI, R12" : : : );
 }
 
 // Unset BASEPRI
-static __inline void __unset_BASEPRI() {
-    __set__BASEPRI(0x00U);
+__attribute__((naked)) void __unset_BASEPRI() {
+    __set_BASEPRI(0x00U);
 }
 
 __attribute__((naked)) void __set_PRIMASK(uint32_t priMask) {
-    // __asm volatile("MOVS R12, #" + );
-    // __asm volatile("MSR PRIMASK, R12");
-    __asm volatile("MOVS R12, %0": :  "r"(priMask & 0x01U)  :   );
-    // __asm volatile("MOVS R12, %1" : : "#"(priMask & 0x01U) : );
+    __asm volatile("MOVS R12, %0": : "r"(priMask & 0x01U) : );
     __asm volatile("MSR PRIMASK, R12" : : : );
-    // register uint32_t primaskReg    __asm("primask");
-    // primaskReg = (0x01U & priMask);
 }
 
-static __inline uint32_t __get_PRIMASK(void) {
-    register uint32_t primaskReg    __asm("primask");
-    return primaskReg;
+__attribute__((naked)) uint32_t __get_PRIMASK(void) {
+    uint32_t pmRet;
+    __asm volatile("MRS %0, PRIMASK": "=r"(pmRet) : : );
+    return pmRet & 0x01U;
 }
 
-static __inline void __set_FAULTMASK(uint32_t faultMask) {
-    register uint32_t faultmaskReg    __asm("faultmask");
-    faultmaskReg = (0x01U & faultMask);
+__attribute__((naked)) void __set_FAULTMASK(uint32_t faultMask) {
+    __asm volatile("MOVS R12, %0": : "r"(faultMask & 0x01U) : );
+    __asm volatile("MSR FAULTMASK, R12" : : : );
 }
 
-static __inline uint32_t __get_FAULTMASK(void) {
-    register uint32_t faultmaskReg    __asm("faultmask");
-    return faultmaskReg;
+__attribute__((naked)) uint32_t __get_FAULTMASK(void) {
+    uint32_t fmRet;
+    __asm volatile("MRS %0, FAULTMASK": "=r"(fmRet) : : );
+    return fmRet & 0x01U;
 }
 
-void __enable_irq() {
-    __set_PRIMASK(0x00U);
+void __clear_pending_IRQn(IRQn_TypeDef IRQn) {
+    int bit_position = (IRQn % 32);
+    NVIC->ICPR[IRQn >> 5] |= (1 << bit_position);
 }
 
-void __disable_irq() {
-    __set_PRIMASK(0x01U);
+uint32_t __get_pending_IRQn(IRQn_TypeDef IRQn) {
+    int bit_position = (IRQn % 32);
+    return (NVIC->ISPR[IRQn >> 5] & (1 << bit_position));
+}
+
+uint32_t __NVIC_GetActive(IRQn_TypeDef IRQn) {
+    int bit_position = (IRQn % 32);
+    return (NVIC->IABR[IRQn >> 5] & (1 << bit_position));
 }
