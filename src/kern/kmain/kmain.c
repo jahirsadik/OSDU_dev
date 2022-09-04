@@ -6,52 +6,55 @@
 #include "../arch/stm32f446re/include/sys/sys.h"
 #include <stdint.h>
 
-
-
 void kmain(void)
 {
 	__sys_init();
 	sysTick_init(SYSTICK_LOAD_VAL_10MS); // demonstration of sysTick Init
-
 	uint32_t num;
 	uint32_t numh;
 	uint32_t total_time = 0;
-	_USART_WRITE(USART2,(uint8_t*)"Booting OS CSE: ");
-	_USART_WRITE(USART2,(uint8_t*)"Version: 1.1\n");
-	_USART_WRITE(USART2,(uint8_t*)"Welcome .... \n");
+	_USART_WRITE(USART2, (uint8_t *)"Booting OS CSE: ");
+	_USART_WRITE(USART2, (uint8_t *)"Version: 1.1\n");
+	_USART_WRITE(USART2, (uint8_t *)"Welcome .... \n");
+	SCB->AIRCR |= (3 << 8); // set priority grouping 11 means 4 bits for group 0 bits for subgroup
+	__NVIC_SetPriority(USART2_STM_IRQn, 3);
 
+	uint32_t pri1 = __NVIC_GetPriority(USART2_STM_IRQn);
+	for (uint32_t i = 0; i < 1000000; i++)
+	{
+		;
+	}
+	kprintf((uint8_t *)"%d", (uint8_t *)&pri1);
 	int i = 0;
-	while(1){
+	while (1)
+	{
+		kprintf((uint8_t *)"%d", (uint8_t *)&pri1);
 		i++;
-		if(i > 10){
-			_USART_WRITE(USART2,(uint8_t*)"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-			__disable_irq();
-			_USART_WRITE(USART2,(uint8_t*)"***********************************************************************\n");
+		if (i > 5)
+		{
+			_USART_WRITE(USART2, (uint8_t *)"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+			__set_FAULTMASK(0x1U);
+			_USART_WRITE(USART2, (uint8_t *)"***********************************************************************\n");
 		}
-		sysTick_enable(); // demonstration of sysTick Enable
-		_USART_WRITE(USART2,(uint8_t*)"++++++++++++++++++++++++++++++++++++++++++++++\n");
-		_USART_WRITE(USART2,(uint8_t*)"SysTickCount Before:");
-		num = getSysTickCount();
-		kprintf((uint8_t*)"%d",(uint8_t*)&num);
-		_USART_WRITE(USART2,(uint8_t*)"Time Before:");
-		numh = getTime();
-		kprintf((uint8_t*)"%d",(uint8_t*)&numh);
+		_USART_WRITE(USART2, (uint8_t *)"Time Before:");
+		num = getTime();
+		kprintf((uint8_t *)"%d", (uint8_t *)&num);
 		// Calculating the time to execute this loop
 		uint32_t sum = 0;
-		for(uint32_t i=0;i<1000000;i++){
+		for (uint32_t i = 0; i < 1000000; i++)
+		{
 			sum += i;
 		};
-		_USART_WRITE(USART2,(uint8_t*)"SysTickCount After:");
-		num = getSysTickCount();
-		kprintf((uint8_t*)"%d",(uint8_t*)&num);
-		_USART_WRITE(USART2,(uint8_t*)"Time After:");
+		_USART_WRITE(USART2, (uint8_t *)"Time After:");
 		numh = getTime();
-		kprintf((uint8_t*)"%d",(uint8_t*)&numh);
-		total_time += numh;
-		_USART_WRITE(USART2,(uint8_t*)"Total Time:");
-		kprintf((uint8_t*)"%d",(uint8_t*)&total_time);
-		sysTick_disable();  // demonstration of sysTick Disable
-		_USART_WRITE(USART2,(uint8_t*)"--------------------------------------------");
+		kprintf((uint8_t *)"%d", (uint8_t *)&numh);
+		total_time += (numh - num);
+		_USART_WRITE(USART2, (uint8_t *)"Total Time:");
+		kprintf((uint8_t *)"%d", (uint8_t *)&total_time);
+		_USART_WRITE(USART2, (uint8_t *)"--------------------------------------------");
+		if (i > 8)
+		{
+			break;
+		}
 	}
 }
-
