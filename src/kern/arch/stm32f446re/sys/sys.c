@@ -1,4 +1,5 @@
 #include "../include/sys/sys.h"
+#include "../include/dev/usart.h"
 
 // The ‘mscount’ variable keeps track of the time in milliseconds from the SysTick timer’s beginning
 volatile uint32_t mscount;
@@ -363,4 +364,9 @@ uint32_t __NVIC_GetActive(IRQn_TypeDef IRQn)
             return 0;
         }
     }
+}
+
+void EXTI0_Handler(void)
+{
+    _USART_WRITE(USART2, (uint8_t *)"AMMAAAAA JAAAAAAN\n");
 }

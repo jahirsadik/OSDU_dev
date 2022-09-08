@@ -18,7 +18,8 @@ void kmain(void)
 	_USART_WRITE(USART2, (uint8_t *)"Welcome .... \n");
 	SCB->AIRCR |= (3 << 8); // set priority grouping 11 means 4 bits for group 0 bits for subgroup
 	__NVIC_SetPriority(USART2_STM_IRQn, 3);
-
+	__enable_irq();
+	__NVIC_EnableIRQn(EXTI0_STM_IRQn);
 	uint32_t pri1 = __NVIC_GetPriority(USART2_STM_IRQn);
 	for (uint32_t i = 0; i < 1000000; i++)
 	{
@@ -30,6 +31,10 @@ void kmain(void)
 	{
 		kprintf((uint8_t *)"%d", (uint8_t *)&pri1);
 		i++;
+		if (i == 4)
+		{
+			NVIC->STIR = EXTI0_STM_IRQn;
+		}
 		if (i > 5)
 		{
 			_USART_WRITE(USART2, (uint8_t *)"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
