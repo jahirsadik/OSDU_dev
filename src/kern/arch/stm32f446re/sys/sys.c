@@ -133,7 +133,7 @@ uint32_t __NVIC_GetPriority(IRQn_TypeDef IRQn)
 {
     if (IRQn >= 0)
     {
-        return (NVIC->IP[IRQn]);
+        return (NVIC->IP[IRQn]) >> 4;
     }
     else
     {
@@ -240,6 +240,16 @@ __attribute__((naked)) void __set_BASEPRI(uint32_t value)
                    :);
 }
 
+__attribute__((naked)) uint32_t __get_BASEPRI(void)
+{
+    uint32_t bpRet;
+    __asm volatile("MRS %0, BASEPRI"
+                   : "=r"(bpRet)
+                   :
+                   :);
+    return bpRet;
+}
+
 // Unset BASEPRI
 __attribute__((naked)) void __unset_BASEPRI()
 {
@@ -304,7 +314,7 @@ uint32_t __get_pending_IRQn(IRQn_TypeDef IRQn)
     if (IRQn >= 0)
     {
         int bit_position = (IRQn % 32);
-        return (NVIC->ISPR[IRQn >> 5] & (1 << bit_position));
+        return ((NVIC->ISPR[IRQn >> 5] & (1 << bit_position)) >> (bit_position));
     }
     else
     {

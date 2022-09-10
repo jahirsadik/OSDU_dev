@@ -178,6 +178,7 @@ __attribute__((naked)) void __set_BASEPRI(uint32_t value);
 __attribute__((naked)) void __unset_BASEPRI(void);
 __attribute__((naked)) void __set_PRIMASK(uint32_t priMask);
 __attribute__((naked)) uint32_t __get_PRIMASK(void);
+__attribute__((naked)) uint32_t __get_BASEPRI(void);
 __attribute__((naked)) void __set_FAULTMASK(uint32_t faultMask);
 __attribute__((naked)) uint32_t __get_FAULTMASK(void);
 #define __enable_irq() __set_PRIMASK(0x00U)
