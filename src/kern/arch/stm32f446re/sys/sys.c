@@ -377,5 +377,5 @@ uint32_t __NVIC_GetActive(IRQn_TypeDef IRQn)
 
 void EXTI0_Handler(void)
 {
-    _USART_WRITE(USART2, (uint8_t *)"AMMAAAAA JAAAAAAN\n");
+    _USART_WRITE(USART2, (uint8_t *)"EXTI0_Handler ENTERED\n");
 }
