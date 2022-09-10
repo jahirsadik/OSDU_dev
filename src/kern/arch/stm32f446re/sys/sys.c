@@ -240,14 +240,13 @@ __attribute__((naked)) void __set_BASEPRI(uint32_t value)
                    :);
 }
 
-__attribute__((naked)) uint32_t __get_BASEPRI(void)
+uint32_t __get_BASEPRI(void)
 {
-    uint32_t bpRet;
-    __asm volatile("MRS %0, BASEPRI"
-                   : "=r"(bpRet)
-                   :
-                   :);
-    return bpRet;
+    uint32_t result;
+
+    __asm volatile("MRS %0, basepri"
+                   : "=r"(result));
+    return (result >> 4);
 }
 
 // Unset BASEPRI

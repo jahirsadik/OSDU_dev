@@ -35,7 +35,7 @@ void kmain(void)
 		}
 		if (i == 5)
 		{
-			//__set_BASEPRI(2 << 4);
+			__set_BASEPRI(2 << 4);
 			uint32_t pri3 = __get_BASEPRI();
 			kprintf((uint8_t *)"%d", (uint8_t *)&pri3);
 			NVIC->STIR = EXTI0_STM_IRQn;
