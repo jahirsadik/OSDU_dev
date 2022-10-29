@@ -16,10 +16,10 @@ void kmain(void)
 	_USART_WRITE(USART2, (uint8_t *)"Version: 1.1\n");
 	_USART_WRITE(USART2, (uint8_t *)"Welcome .... \n");
 	SCB->AIRCR |= (3 << 8); // set priority grouping 11 means 4 bits for group 0 bits for subgroup
-	__NVIC_SetPriority(USART2_STM_IRQn, 0);
+	__NVIC_SetPriority(USART2_STM_IRQn, 0); // Setting USART2 IRQ to max priority (lowest value)
 	__enable_irq();
-	__NVIC_EnableIRQn(EXTI0_STM_IRQn);
-	uint32_t pri1 = __NVIC_GetPriority(USART2_STM_IRQn);
+	__NVIC_EnableIRQn(EXTI0_STM_IRQn); // enabling EXTI0 IRQ
+	uint32_t pri1 = __NVIC_GetPriority(USART2_STM_IRQn); // checking if USART2 priority was set
 	kprintf((uint8_t *)"%d", (uint8_t *)&pri1);
 	int i = 0;
 	while (1)
@@ -33,6 +33,7 @@ void kmain(void)
 		_USART_WRITE(USART2, (uint8_t *)"Iteration: ");
 		kprintf((uint8_t *)"%d", (uint8_t *)&i);
 
+		// Demonstration of Interrupt Handler Invocation
 		if (i == 4)
 		{
 			NVIC->STIR = EXTI0_STM_IRQn;
@@ -40,6 +41,7 @@ void kmain(void)
 			uint32_t pri2 = __NVIC_GetPriority(EXTI0_STM_IRQn);
 			kprintf((uint8_t *)"%d", (uint8_t *)&pri2);
 		}
+		// Demo. of BASEPRI, doesn't mask as EXTI0 priority is lower value
 		if (i == 5)
 		{
 			__set_BASEPRI(6 << 4);
@@ -47,6 +49,7 @@ void kmain(void)
 			kprintf((uint8_t *)"%d", (uint8_t *)&pri3);
 			NVIC->STIR = EXTI0_STM_IRQn;
 		}
+		// Demo. of BASEPRI, masks now
 		if (i == 6)
 		{
 			__set_BASEPRI(4 << 4);
@@ -54,6 +57,7 @@ void kmain(void)
 			kprintf((uint8_t *)"%d", (uint8_t *)&pri3);
 			NVIC->STIR = EXTI0_STM_IRQn;
 		}
+		// Checking values of FAULTMASK AND PRIMASK
 		if (i == 7)
 		{
 			uint32_t a = __get_FAULTMASK();
@@ -62,18 +66,21 @@ void kmain(void)
 			kprintf((uint8_t *)"%d", (uint8_t *)&b);
 			NVIC->STIR = EXTI0_STM_IRQn;
 		}
+		// Demo. of FaultMask
 		if (i == 8)
 		{
 			_USART_WRITE(USART2, (uint8_t *)"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 			__set_FAULTMASK(0x1U);
 			_USART_WRITE(USART2, (uint8_t *)"***********************************************************************\n");
 		}
+		// Re-enabling Interrupts by setting FaultMask = 0
 		if (i == 12)
 		{
 			_USART_WRITE(USART2, (uint8_t *)"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 			__enable_fault_irq();
 			_USART_WRITE(USART2, (uint8_t *)"***********************************************************************\n");
 		}
+		// Demo. of PriMask
 		if (i == 13)
 		{
 			_USART_WRITE(USART2, (uint8_t *)"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");

@@ -226,7 +226,7 @@ void __NVIC_DisableIRQn(IRQn_TypeDef IRQn)
 }
 
 // Set BASEPRI
-// Note that the value needs to be shifted by 4 when passing the arg
+// The Value needs to be shifted by 4 when passing the arg
 // This is assuming that only 4 bits are implemented
 __attribute__((naked)) void __set_BASEPRI(uint32_t value)
 {
