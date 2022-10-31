@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 
+ * Copyright (c) 2022
  * Computer Science and Engineering, University of Dhaka
  * Credit: CSE Batch 25 (starter) and Prof. Mosaddek Tushar
  *
@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
- 
+
 #include <sys_init.h>
 #include <cm4.h>
 #include <kmain.h>
@@ -37,28 +37,93 @@
 #include <usart.h>
 //#include "../include/float.h"
 
+#include <unistd.h>
+
+void changeMode(uint32_t modeValue)
+{
+	__asm volatile("MOVS R12, %0"
+				   :
+				   : "r"(modeValue)
+				   :);
+	__asm volatile("MSR CONTROL, R12"
+				   :
+				   :
+				   :);
+}
+
+uint32_t getMode(void)
+{
+	uint32_t cRet;
+	__asm volatile("MRS %0, control"
+				   : "=r"(cRet)
+				   :
+				   :);
+	kprintf("Amogus 69: %d\n", cRet);
+	return cRet & 0xFU;
+}
+
+uint32_t getIPSR(void)
+{
+	uint32_t cRet;
+	__asm volatile("MRS %0, ipsr"
+				   : "=r"(cRet)
+				   :
+				   :);
+	kprintf("Amogus getIPSR: %d\n", cRet);
+	return cRet & 0xFU;
+}
+
+int in_privileged(void)
+{
+	if (getIPSR() != 0)
+		return 1; // True
+	else
+	{
+		if ((getMode() & 0x1) == 0)
+			return 1; // True
+		else
+			return 0; // False
+	}
+}
+
 void kmain(void)
 {
-__sys_init();
+	__sys_init();
 
-//uint32_t b=0;
-float x=50.59;
-uint8_t y=23,f=56;
-x++;
-kprintf("%d %d %f\n",y,f,x);
-kprintf("After Input\n");
-//uint8_t p[8]="1234.34\0";
-//x=str2float(p);
-kprintf("After Input\n");
-kprintf("Time Elapse %d ms\n",__getTime());
-while(1){
-//	kprintf((uint8_t*)"%d",(uint8_t*)a);
-//	kscanf((uint8_t*)"%d",(uint8_t*)b);
-//	kprintf((uint8_t*)"%d",(uint8_t*)b);
-//	a++;
-//	b++;
-	//you can change the following line by replacing a delay function
-	//for(uint32_t i=0;i<100000000;i++){kprintf("Time Elapse %d ms\n",__getTime());}	
-}
-}
+	// uint32_t b=0;
+	float x = 50.59;
+	uint8_t y = 23, f = 56;
+	x++;
+	kprintf("%d %d %f\n", y, f, x);
+	kprintf("After Input\n");
+	// uint8_t p[8]="1234.34\0";
+	// x=str2float(p);
+	kprintf("After Input\n");
+	kprintf("Time Elapse %d ms\n", __getTime());
+	// while (1)
+	// {
+	// 	//	kprintf((uint8_t*)"%d",(uint8_t*)a);
+	// 	//	kscanf((uint8_t*)"%d",(uint8_t*)b);
+	// 	//	kprintf((uint8_t*)"%d",(uint8_t*)b);
+	// 	//	a++;
+	// 	//	b++;
+	// 	// you can change the following line by replacing a delay function
+	// 	// for(uint32_t i=0;i<100000000;i++){kprintf("Time Elapse %d ms\n",__getTime());}
+	// }
 
+	changeMode(0x01);
+
+	for (uint32_t i = 0; i < 1000000; i++)
+		;
+	uint32_t mode = getMode();
+	kprintf("Amogus 2: %d\n", mode);
+	if (in_privileged())
+	{
+		kprintf("Privileged\n");
+	}
+	else
+	{
+		kprintf("Unprivileged\n");
+	}
+	duprintf();
+}
