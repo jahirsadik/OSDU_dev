@@ -30,10 +30,51 @@
 
 #include <unistd.h>
 #include <kstdio.h>
+#include <kunistd.h>
+#include <syscall_def.h>
+#include <stddef.h>
+#include <kmain.h>
 /* Write your highlevel I/O details */
 
-// printf function
-void duprintf()
+// idk where to put write
+uint32_t write(uint32_t fd, char *s, size_t len)
 {
-    kprintf("Baal falaise\n");
+    // first argument must be SYS_write service ID
+    // SVC call for SYS_write
+    __asm volatile("MOV R1, %0"
+                   :
+                   : "r"(len)
+                   :);
+    // insert pointer s in register r1
+    __asm volatile("MOVS R2, %0"
+                   :
+                   : "r"(s)
+                   :);
+    __asm volatile("MOV R3, %0"
+                   :
+                   : "r"(fd)
+                   :);
+    __asm volatile("SVC #0x37");
+    return 0;
+}
+
+// printf function
+void duprintf(int i)
+{
+    // temp placeholder
+    if (i)
+    {
+        char *temp = "Hello World"; // TODO: where to take this address from?
+        // kprintf("---------Pointer to Temp: %d\n", temp);
+        // kprintf("duprintf - R13: %d, PSP: %d, MSP: %d\n", readR13(), readPSP(), readMSP());
+        uint32_t return_code = write(STDOUT_FILENO, temp, 11);
+    }
+    else
+    {
+        char *temp = "Behho Korke"; // TODO: where to take this address from?
+        // kprintf("---------Pointer to Temp: %d\n", temp);
+        // kprintf("duprintf - R13: %d, PSP: %d, MSP: %d\n", readR13(), readPSP(), readMSP());
+        uint32_t return_code = write(STDOUT_FILENO, temp, 11);
+    }
+    return;
 }

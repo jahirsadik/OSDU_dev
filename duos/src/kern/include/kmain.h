@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 
+ * Copyright (c) 2022
  * Computer Science and Engineering, University of Dhaka
  * Credit: CSE Batch 25 (starter) and Prof. Mosaddek Tushar
  *
@@ -31,16 +31,11 @@
 #ifndef __KMAIN_H
 #define __KMAIN_H
 
-
-#define MAX_TASKS   5
+#define MAX_TASKS 5
 
 /* some stack memory calculations */
-#define SIZE_TASK_STACK          1024U
-#define SIZE_SCHED_STACK         1024U
-
-#define SRAM_START               0x20000000U
-#define SIZE_SRAM                ( (128) * (1024))
-#define SRAM_END                 ((SRAM_START) + (SIZE_SRAM) )
+#define SIZE_TASK_STACK 1024U
+#define SIZE_SCHED_STACK 1024U
 
 /*#define T1_STACK_START           SRAM_END
 #define T2_STACK_START           ( (SRAM_END) - (1 * SIZE_TASK_STACK) )
@@ -51,18 +46,32 @@
 */
 #define TICK_HZ 1000U
 
-#define HSI_CLOCK         		16000000U
-#define SYSTICK_TIM_CLK   		HSI_CLOCK
+#define HSI_CLOCK 16000000U
+#define SYSTICK_TIM_CLK HSI_CLOCK
 
+#define DUMMY_XPSR 0x01000000U
 
-#define DUMMY_XPSR  0x01000000U
+#define TASK_READY_STATE 0x00
+#define TASK_BLOCKED_STATE 0XFF
 
-#define TASK_READY_STATE  0x00
-#define TASK_BLOCKED_STATE  0XFF
+#define INTERRUPT_DISABLE()             \
+    do                                  \
+    {                                   \
+        __asm volatile("MOV R0,#0x1");  \
+        asm volatile("MSR PRIMASK,R0"); \
+    } while (0)
 
-#define INTERRUPT_DISABLE()  do{__asm volatile ("MOV R0,#0x1"); asm volatile("MSR PRIMASK,R0"); } while(0)
-
-#define INTERRUPT_ENABLE()  do{__asm volatile ("MOV R0,#0x0"); asm volatile("MSR PRIMASK,R0"); } while(0)
+#define INTERRUPT_ENABLE()              \
+    do                                  \
+    {                                   \
+        __asm volatile("MOV R0,#0x0");  \
+        asm volatile("MSR PRIMASK,R0"); \
+    } while (0)
+uint32_t in_privileged(void);
+uint32_t getIPSR(void);
+uint32_t getMode(void);
+uint32_t readR13(void);
+uint32_t readPSP(void);
+uint32_t readMSP(void);
 
 #endif /* KMAIN_H */
-
