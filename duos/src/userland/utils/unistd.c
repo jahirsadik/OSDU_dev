@@ -36,11 +36,17 @@
 #include <kmain.h>
 /* Write your highlevel I/O details */
 
+void fu()
+{
+    int x = 41;
+    // float y = 20.5;
+    duprintf("OKAY %d %x %f \n\r", x, x, (float)x);
+    duprintf("HELLO %d %x %f \n\r", x, x, x);
+}
+
 // idk where to put write
 uint32_t write(uint32_t fd, char *s, size_t len)
 {
-    // first argument must be SYS_write service ID
-    // SVC call for SYS_write
     __asm volatile("MOV R1, %0"
                    :
                    : "r"(len)
@@ -50,7 +56,7 @@ uint32_t write(uint32_t fd, char *s, size_t len)
                    :
                    : "r"(s)
                    :);
-    __asm volatile("MOV R3, %0"
+    __asm volatile("MOV R12, %0"
                    :
                    : "r"(fd)
                    :);
@@ -58,23 +64,115 @@ uint32_t write(uint32_t fd, char *s, size_t len)
     return 0;
 }
 
-// printf function
-void duprintf(int i)
+void duprintf(char *format, ...)
 {
-    // temp placeholder
-    if (i)
+    char *tr;
+    uint32_t i;
+    uint8_t *str;
+    va_list list;
+    double dval;
+    // uint32_t *intval;
+    va_start(list, format);
+    uint8_t result[100];
+    int index = 0;
+    for (tr = format; *tr != '\0'; tr++)
     {
-        char *temp = "Hello World"; // TODO: where to take this address from?
-        // kprintf("---------Pointer to Temp: %d\n", temp);
-        // kprintf("duprintf - R13: %d, PSP: %d, MSP: %d\n", readR13(), readPSP(), readMSP());
-        uint32_t return_code = write(STDOUT_FILENO, temp, 11);
+        while (*tr != '%' && *tr != '\0')
+        {
+            // UART_SendChar(USART2,*tr);
+            result[index++] = (uint8_t)*tr;
+            tr++;
+        }
+        if (*tr == '\0')
+            break;
+        tr++;
+        switch (*tr)
+        {
+        case 'c':
+            i = va_arg(list, int);
+            // UART_SendChar(USART2,i);
+            result[index++] = (uint8_t)i;
+            break;
+        case 'd':
+            i = va_arg(list, int);
+            if (i < 0)
+            {
+                // UART_SendChar(USART2,'-');
+                result[index++] = (uint8_t)'-';
+                i = -i;
+            }
+            uint8_t *s1 = (uint8_t *)convert(i, 10);
+            while (*s1)
+            {
+                result[index++] = *s1;
+                // UART_SendChar(USART2,*s1);
+                s1++;
+            }
+
+            // _USART_WRITE(USART2,(uint8_t*)convert(i,10));
+            break;
+        case 'o':
+            i = va_arg(list, int);
+            if (i < 0)
+            {
+                // UART_SendChar(USART2,'-');
+                result[index++] = '-';
+                i = -i;
+            }
+            // _USART_WRITE(USART2,(uint8_t*)convert(i,8));
+            s1 = (uint8_t *)convert(i, 8);
+            while (*s1)
+            {
+                result[index++] = *s1;
+                // UART_SendChar(USART2,*s1);
+                s1++;
+            }
+            break;
+        case 'x':
+            i = va_arg(list, int);
+            if (i < 0)
+            {
+                // UART_SendChar(USART2,'-');
+                result[index++] = '-';
+                i = -i;
+            }
+            // _USART_WRITE(USART2,(uint8_t*)convert(i,16));
+            s1 = (uint8_t *)convert(i, 16);
+            while (*s1)
+            {
+                result[index++] = *s1;
+                // UART_SendChar(USART2,*s1);
+                s1++;
+            }
+            break;
+        case 's':
+            str = va_arg(list, uint8_t *);
+            // _USART_WRITE(USART2,str);
+            s1 = (uint8_t *)&str;
+            while (*s1)
+            {
+                result[index++] = *s1;
+                // UART_SendChar(USART2,*s1);
+                s1++;
+            }
+            break;
+        case 'f':
+            dval = va_arg(list, double);
+            // _USART_WRITE(USART2,(uint8_t*)float2str(dval));
+            s1 = (uint8_t *)float2str(dval);
+            while (*s1)
+            {
+                result[index++] = *s1;
+                // UART_SendChar(USART2,*s1);
+                s1++;
+            }
+            break;
+        default:
+            break;
+        }
     }
-    else
-    {
-        char *temp = "Behho Korke"; // TODO: where to take this address from?
-        // kprintf("---------Pointer to Temp: %d\n", temp);
-        // kprintf("duprintf - R13: %d, PSP: %d, MSP: %d\n", readR13(), readPSP(), readMSP());
-        uint32_t return_code = write(STDOUT_FILENO, temp, 11);
-    }
-    return;
+    va_end(list);
+    result[index] = '\0';
+    // kprintf("ok = %s\n\r",result);
+    write(STDOUT_FILENO, (char *)result, 10);
 }

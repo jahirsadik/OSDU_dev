@@ -100,7 +100,7 @@ void SVC_Handler_Main(unsigned int *svc_args)
 	switch (svc_number)
 	{
 	case 55:
-		kprintf("SVC_Handler_Main: %d %d %d %d\n", reg0, reg1, reg2, reg3);
+		kprintf("SVC_Handler_Main: %d %d %d %d\n", reg0, reg1, reg2, reg4);
 		kprintf("R13: %d, PSP: %d, MSP: %d\n", readR13(), readPSP(), readMSP());
 		kprintf("SVC Number: %d\n", svc_number);
 		kprintf("Pointer to Temp: %d\n", reg2);

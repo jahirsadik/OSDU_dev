@@ -49,27 +49,28 @@ void changeMode(uint32_t modeValue)
 				   :
 				   :
 				   :);
+	__asm volatile("ISB");
 }
 
 uint32_t getMode()
 {
 	uint32_t cRet;
-	__asm volatile("MRS %0, control"
+	__asm volatile("MRS %0, CONTROL"
 				   : "=r"(cRet)
 				   :
 				   :);
-	return cRet & 0xFU;
+	return cRet;
 }
 
 uint32_t getIPSR()
 {
 	uint32_t cRet;
-	__asm volatile("MRS %0, ipsr"
+	__asm volatile("MRS %0, IPSR"
 				   : "=r"(cRet)
 				   :
 				   :);
 	kprintf("getIPSR: %d\n", cRet);
-	return cRet & 0xFU;
+	return cRet;
 }
 
 uint32_t in_privileged()
@@ -91,6 +92,7 @@ void setPSP(void)
 	__asm volatile(".equ STACK_PSP_START, (SRAM_END - 512)");
 	__asm volatile("LDR R0,=STACK_PSP_START");
 	__asm volatile("MSR PSP, R0");
+	__asm volatile("ISB");
 	//__asm volatile("MOVS R0, #0X02");
 	// __asm volatile("MSR CONTROL, R0");
 	//__asm volatile("BX LR");
@@ -129,29 +131,8 @@ uint32_t readR13()
 void kmain(void)
 {
 	__sys_init();
-
-	// uint32_t b=0;
-	float x = 50.59;
-	uint8_t y = 23, f = 56;
-	x++;
-	kprintf("%d %d %f\n", y, f, x);
-	kprintf("After Input\n");
-	// uint8_t p[8]="1234.34\0";
-	// x=str2float(p);
-	kprintf("After Input\n");
-	kprintf("Time Elapse %d ms\n", __getTime());
-	// while (1)
-	// {
-	// 	//	kprintf((uint8_t*)"%d",(uint8_t*)a);
-	// 	//	kscanf((uint8_t*)"%d",(uint8_t*)b);
-	// 	//	kprintf((uint8_t*)"%d",(uint8_t*)b);
-	// 	//	a++;
-	// 	//	b++;
-	// 	// you can change the following line by replacing a delay function
-	// 	// for(uint32_t i=0;i<100000000;i++){kprintf("Time Elapse %d ms\n",__getTime());}
-	// }
 	setPSP();
-	kprintf("Aschi");
+
 	uint32_t psp = readPSP();
 	kprintf("PSP: %d\n", psp);
 	psp = readR13();
@@ -162,7 +143,7 @@ void kmain(void)
 	for (uint32_t i = 0; i < 1000000; i++)
 		;
 	uint32_t mode = getMode();
-	kprintf("Amogus 2: %d\n", mode);
+	kprintf("MODE in kmain: %d\n", mode);
 	if (in_privileged())
 	{
 		kprintf("Privileged\n");
@@ -172,7 +153,6 @@ void kmain(void)
 		kprintf("Unprivileged\n");
 	}
 	kprintf("kmain - R13: %d, PSP: %d, MSP: %d\n", readR13(), readPSP(), readMSP());
-	duprintf(0);
-	duprintf(1);
-	kprintf("FIRECHI\n");
+	fu();
+	kprintf("BACK IN KMAIN\n");
 }
