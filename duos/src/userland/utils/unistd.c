@@ -33,16 +33,9 @@
 #include <kunistd.h>
 #include <syscall_def.h>
 #include <stddef.h>
+#include <kstring.h>
 #include <kmain.h>
 /* Write your highlevel I/O details */
-
-void fu()
-{
-    int x = 41;
-    // float y = 20.5;
-    duprintf("OKAY %d %x %f \n\r", x, x, (float)x);
-    duprintf("HELLO %d %x %f \n\r", x, x, x);
-}
 
 // idk where to put write
 uint32_t write(uint32_t fd, char *s, size_t len)
@@ -175,4 +168,15 @@ void duprintf(char *format, ...)
     result[index] = '\0';
     // kprintf("ok = %s\n\r",result);
     write(STDOUT_FILENO, (char *)result, 10);
+}
+
+void fu()
+{
+    int x = 41;
+    // float y = 20.5;
+    kprintf("Before DUPRINTF Calls\n");
+    duprintf("OKAY %d %x %f \n\r", x, x, (float)x);
+    kprintf("After DUPRINTF Call\n");
+    duprintf("HELLO %d %x %f \n\r", x, x, x);
+    kprintf("After DUPRINTF Calls\n");
 }

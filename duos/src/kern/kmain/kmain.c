@@ -139,8 +139,25 @@ void kmain(void)
 	kprintf("R13: %d\n", psp);
 	psp = readMSP();
 	kprintf("MSP: %d\n", psp);
+
+	// priority handling
+	__NVIC_SetPriority(SVCall_IRQn, 0);
+	__NVIC_SetPriority(USART2_STM_IRQn, 2);
+	__NVIC_SetPriority(USART1_STM_IRQn, 2);
+	__NVIC_SetPriority(USART3_STM_IRQn, 2);
+	__NVIC_SetPriority(USART6_STM_IRQn, 2);
+	__NVIC_SetPriority(SysTick_IRQn, 2);
+	kprintf("SVCall_IRQn: %d\n", __NVIC_GetPriority(SVCall_IRQn));
+	kprintf("SysTick_IRQn: %d\n", __NVIC_GetPriority(SysTick_IRQn));
+	kprintf("USART_IRQn1: %d\n", __NVIC_GetPriority(USART1_STM_IRQn));
+	kprintf("USART_IRQn2: %d\n", __NVIC_GetPriority(USART2_STM_IRQn));
+	kprintf("USART_IRQn3: %d\n", __NVIC_GetPriority(USART3_STM_IRQn));
+	kprintf("USART_IRQn6: %d\n", __NVIC_GetPriority(USART6_STM_IRQn));
+
+	// ending priority handling
+
 	changeMode(3);
-	for (uint32_t i = 0; i < 1000000; i++)
+	for (uint32_t i = 0; i < 10000000; i++)
 		;
 	uint32_t mode = getMode();
 	kprintf("MODE in kmain: %d\n", mode);
@@ -155,4 +172,6 @@ void kmain(void)
 	kprintf("kmain - R13: %d, PSP: %d, MSP: %d\n", readR13(), readPSP(), readMSP());
 	fu();
 	kprintf("BACK IN KMAIN\n");
+	while (1)
+		;
 }

@@ -31,6 +31,7 @@
 #include <stm32_startup.h>
 #include <kstdio.h>
 #include <kmain.h>
+#include <cm4.h>
 void Reset_Handler(void)
 {
 	uint32_t size = (uint32_t)&_edata - (uint32_t)&_sdata;
@@ -67,16 +68,28 @@ void HardFault_Handler(void)
 
 void MemManage_Handler(void)
 {
-	//	printf("Exception : MemManage\n");
+	kprintf("Exception : MemManage\n");
 	while (1)
 		;
 }
 
 void BusFault_Handler(void)
 {
-	//	printf("Exception : BusFault\n");
+	kprintf("Exception : BusFault\n");
 	while (1)
 		;
+}
+
+__attribute__((naked)) void SVCall_Handler(void)
+{
+	/* Write code for SVC handler */
+	/* the handler function evntually call syscall function with a call number */
+	__asm volatile(
+		"TST lr, #4;\n"
+		"ITE EQ;\n"
+		"MRSEQ r0, MSP;\n"
+		"MRSNE r0, PSP;\n"
+		"B SVC_Handler_Main;\n");
 }
 
 void SVC_Handler_Main(unsigned int *svc_args)
@@ -109,17 +122,4 @@ void SVC_Handler_Main(unsigned int *svc_args)
 	default: /* unknown SVC */
 		break;
 	}
-}
-
-__attribute__((naked)) void SVCall_Handler(void)
-{
-	/* Write code for SVC handler */
-	/* the handler function evntually call syscall function with a call number */
-	__asm volatile(
-		".global SVC_Handler_Main\n"
-		"TST lr, #4\n"
-		"ITE EQ\n"
-		"MRSEQ r0, MSP\n"
-		"MRSNE r0, PSP\n"
-		"B SVC_Handler_Main\n");
 }

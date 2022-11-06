@@ -67,6 +67,7 @@
         __asm volatile("MOV R0,#0x0");  \
         asm volatile("MSR PRIMASK,R0"); \
     } while (0)
+
 uint32_t in_privileged(void);
 uint32_t getIPSR(void);
 uint32_t getMode(void);
